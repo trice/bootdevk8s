@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synergychat-api
+  namespace: default
+  labels:
+    app: synergychat-api
+spec:
+  selector:
+    matchLabels:
+      app: synergychat-api
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container:  
+      labels:
+        app: synergychat-api
+    spec:
+      volumes:
+        - name: synergychat-api-volume
+          persistentVolumeClaim:
+            claimName: synergychat-api-pvc
+      # initContainers:
+        # Init containers are exactly like regular containers, except:
+          # - Init containers always run to completion.
+          # - Each init container must complete successfully before the next one starts.
+      containers:
+      - name: synergychat-api
+        image: bootdotdev/synergychat-api:latest
+        volumeMounts:
+          - name: synergychat-api-volume
+            mountPath: /persist
+        env:
+          - name: API_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: synergychat-api-configmap
+                key: API_PORT
